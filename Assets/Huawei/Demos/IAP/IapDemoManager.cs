@@ -11,6 +11,7 @@ using System;
 using UnityEngine.Events;
 using HuaweiMobileServices.Id;
 using HmsPlugin;
+using UnityEngine.UI;
 
 public class IapDemoManager : MonoBehaviour
 {
@@ -41,6 +42,7 @@ public class IapDemoManager : MonoBehaviour
     void Start()
     {
         Debug.Log("[HMS]: Started");
+        iapManager = GetComponent<IapManager>();
         accountManager = GetComponent<AccountManager>();
         Debug.Log(accountManager.ToString());
         accountManager.OnSignInFailed = (error) =>
@@ -53,8 +55,7 @@ public class IapDemoManager : MonoBehaviour
 
     private void SignedIn(AuthHuaweiId authHuaweiId)
     {
-        Debug.Log("[HMS]: SignedIn");
-        iapManager = GetComponent<IapManager>();
+        Debug.Log("[HMS]: SignedIn + " + authHuaweiId.DisplayName);
         iapManager.OnCheckIapAvailabilitySuccess = LoadStore;
         iapManager.OnCheckIapAvailabilityFailure = (error) =>
         {

@@ -16,10 +16,10 @@ public class AccountDemoManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        loggedInUser = GameObject.Find("LoggedUserText").GetComponent<Text>();
+        loggedInUser = GameObject.Find("UserText").GetComponent<Text>();
         loggedInUser.text = NOT_LOGGED_IN;
 
-        accountManager = AccountManager.GetInstance();
+        accountManager = GetComponent<AccountManager>();//AccountManager.GetInstance();
         accountManager.OnSignInSuccess = OnLoginSuccess;
         accountManager.OnSignInFailed = OnLoginFailure;
     }
