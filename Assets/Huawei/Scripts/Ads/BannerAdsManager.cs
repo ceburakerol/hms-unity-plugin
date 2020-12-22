@@ -1,35 +1,23 @@
-﻿using HuaweiConstants;
-using HuaweiMobileServices.Ads;
-using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System;
 using UnityEngine;
-using UnityEngine.Advertisements;
-using UnityEngine.UI;
-using UnityEngine.Video;
+using HuaweiConstants;
+using HuaweiMobileServices.Ads;
 using static HuaweiConstants.UnityBannerAdPositionCode;
 
 namespace HmsPlugin
 {
     public class BannerAdsManager : MonoBehaviour
     {
+        public string BANNER_AD_ID = "f0iaw23rfk";
+
+        [HideInInspector] public bool _isInitialized;
+
+        AdStatusListener mAdStatusListener;
+
+        BannerAd bannerAdView = null;
+
         public event Action BannerLoaded;
         public event Action BannerFailedToLoad;
-        public static BannerAdsManager GetInstance(string name = "AdsManager") => GameObject.Find(name).GetComponent<BannerAdsManager>();
-        private BannerAd bannerAdView = null;
-
-        private bool _isInitialized;
-        AdStatusListener mAdStatusListener;
-        private string mAdId;
-        public string AdId
-        {
-            get => mAdId;
-            set
-            {
-                Debug.Log($"[HMS] BannerAdManager: Set banner ads ID: {value}");
-                mAdId = value;
-            }
-        }
 
         public void LoadBannerAds(UnityBannerAdPositionCodeType position, string bannerSize = UnityBannerAdSize.BANNER_SIZE_320_50)
         {
@@ -46,7 +34,7 @@ namespace HmsPlugin
             mAdStatusListener.mOnAdFailed += mOnAdFailed;
 
             bannerAdView = new BannerAd(mAdStatusListener);
-            bannerAdView.AdId = mAdId;
+            bannerAdView.AdId = BANNER_AD_ID;
             bannerAdView.PositionType = (int)position;
             bannerAdView.SizeType = bannerSize;
             bannerAdView.AdStatusListener = mAdStatusListener;
@@ -87,7 +75,6 @@ namespace HmsPlugin
             Debug.Log("[HMS] BannerAdManager mOnAdOpened : ");
         }
 
-        // Start is called before the first frame update
         void Start()
         {
             Debug.Log("[HMS] BannerAdManager Start");

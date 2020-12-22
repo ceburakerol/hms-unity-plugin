@@ -61,7 +61,7 @@ namespace HmsPlugin
             saveGameManager.SavedGameAuth();
             saveGameManager.GetArchivesClient();
             //Leaderboard Initilize
-            leaderboardManager.rankingsClient = Games.GetRankingsClient(accountManager.HuaweiId);
+            //leaderboardManager.rankingsClient = Games.GetRankingsClient(accountManager.HuaweiId);
         }
         public void GetPlayerInfo()
         {

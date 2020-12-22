@@ -45,11 +45,11 @@ public class IapDemoManager : MonoBehaviour
         iapManager = GetComponent<IapManager>();
         accountManager = GetComponent<AccountManager>();
         Debug.Log(accountManager.ToString());
-        accountManager.OnSignInFailed = (error) =>
-        {
-            Debug.Log($"[HMSPlugin]: SignIn failed. {error.Message}");
-        };
-        accountManager.OnSignInSuccess = SignedIn;
+        //accountManager.OnSignInFailed = (error) =>
+        //{
+        //    Debug.Log($"[HMSPlugin]: SignIn failed. {error.Message}");
+        //};
+        //accountManager.OnSignInSuccess = SignedIn;
         accountManager.SignIn();
     }
 

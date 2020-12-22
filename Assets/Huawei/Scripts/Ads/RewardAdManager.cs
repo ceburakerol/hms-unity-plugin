@@ -8,75 +8,52 @@ namespace HmsPlugin
 {
     public class RewardAdManager : MonoBehaviour
     {
+        public string REWARD_AD_ID = "y826cynklq";
 
-        private class RewardAdListener : IRewardAdStatusListener
-        {
-            private readonly RewardAdManager mAdsManager;
+        public Action OnRewardAdClosedAction { get; set; }
+        public Action<int> OnRewardAdFailedToShowAction { get; set; }
+        public Action OnRewardAdOpenedAction { get; set; }
+        public Action<Reward> OnRewardedAction { get; set; }
 
-            public RewardAdListener(RewardAdManager adsManager)
-            {
-                mAdsManager = adsManager;
-            }
+        private RewardAd rewardAd = null;
 
-            public void OnRewardAdClosed()
-            {
-                Debug.Log("[HMS] AdsManager OnRewardAdClosed");
-                mAdsManager.OnRewardAdClosed?.Invoke();
-                mAdsManager.LoadNextRewardedAd();
-            }
-
-            public void OnRewardAdFailedToShow(int errorCode)
-            {
-                Debug.Log("[HMS] AdsManager OnRewardAdFailedToShow " + errorCode);
-                mAdsManager.OnRewardAdFailedToShow?.Invoke(errorCode);
-            }
-
-            public void OnRewardAdOpened()
-            {
-                Debug.Log("[HMS] AdsManager OnRewardAdOpened");
-                mAdsManager.OnRewardAdOpened?.Invoke();
-            }
-
-            public void OnRewarded(Reward reward)
-            {
-                Debug.Log("[HMS] AdsManager OnRewarded " + reward);
-                mAdsManager.OnRewarded?.Invoke(reward);
-            }
-        }
-
-    public static RewardAdManager GetInstance(string name = "AdsManager") => GameObject.Find(name).GetComponent<RewardAdManager>();
-
-    private RewardAd rewardAd = null;
-
-        private string mAdId;
-
-        public string AdId
-        {
-            get => mAdId;
-            set
-            {
-                Debug.Log($"[HMS] RewardAdManager: Set reward ad ID: {value}");
-                mAdId = value;
-                LoadNextRewardedAd();
-            }
-        }
-
-        public Action OnRewardAdClosed { get; set; }
-        public Action<int> OnRewardAdFailedToShow { get; set; }
-        public Action OnRewardAdOpened { get; set; }
-        public Action<Reward> OnRewarded { get; set; }
-
-        // Start is called before the first frame update
         void Start()
         {
             Debug.Log("[HMS] RewardAdManager Start");
             HwAds.Init();
+
+            OnRewardAdClosedAction = OnRewardAdClosed;
+            OnRewardAdFailedToShowAction = OnRewardAdFailedToShow;
+            OnRewardAdOpenedAction = OnRewardAdOpened;
+            OnRewardedAction = OnRewarded;
+
+            LoadNextRewardedAd();
+        }
+
+        public void OnRewardAdClosed()
+        {
+            Debug.Log("[HMS] OnRewardAdClosed");
+        }
+
+        public void OnRewardAdFailedToShow(int id)
+        {
+            Debug.Log("[HMS] OnRewardAdFailedToShow " + id);
+        }
+
+        public void OnRewardAdOpened()
+        {
+            Debug.Log("[HMS] OnRewardAdOpened");
+        }
+
+        public void OnRewarded(Reward reward)
+        {
+            Debug.Log("[HMS] OnRewarded" + reward.Name + " - " + reward.Amount);
         }
 
         private void LoadNextRewardedAd()
         {
             Debug.Log("[HMS] AdsManager LoadNextRewardedAd");
-            rewardAd = new RewardAd(AdId);
+            rewardAd = new RewardAd(REWARD_AD_ID);
             rewardAd.LoadAd(
                 new AdParam.Builder().Build(),
                 () => Debug.Log("[HMS] Rewarded ad loaded!"),
@@ -95,6 +72,41 @@ namespace HmsPlugin
             else
             {
                 Debug.Log("[HMS] Reward ad clicked but still not loaded");
+            }
+        }
+
+        private class RewardAdListener : IRewardAdStatusListener
+        {
+            private readonly RewardAdManager mAdsManager;
+
+            public RewardAdListener(RewardAdManager adsManager)
+            {
+                mAdsManager = adsManager;
+            }
+
+            public void OnRewardAdClosed()
+            {
+                Debug.Log("[HMS] AdsManager OnRewardAdClosed");
+                mAdsManager.OnRewardAdClosedAction?.Invoke();
+                mAdsManager.LoadNextRewardedAd();
+            }
+
+            public void OnRewardAdFailedToShow(int errorCode)
+            {
+                Debug.Log("[HMS] AdsManager OnRewardAdFailedToShow " + errorCode);
+                mAdsManager.OnRewardAdFailedToShowAction?.Invoke(errorCode);
+            }
+
+            public void OnRewardAdOpened()
+            {
+                Debug.Log("[HMS] AdsManager OnRewardAdOpened");
+                mAdsManager.OnRewardAdOpenedAction?.Invoke();
+            }
+
+            public void OnRewarded(Reward reward)
+            {
+                Debug.Log("[HMS] AdsManager OnRewarded " + reward);
+                mAdsManager.OnRewardedAction?.Invoke(reward);
             }
         }
     }

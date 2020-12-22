@@ -11,10 +11,7 @@ namespace HmsPlugin
 {
     public class IapManager : MonoBehaviour
     {
-
-    public static IapManager GetInstance(string name = "IapManager") => GameObject.Find(name).GetComponent<IapManager>();
-
-    private static readonly HMSException IAP_NOT_AVAILABLE = new HMSException("IAP not available");
+        private static readonly HMSException IAP_NOT_AVAILABLE = new HMSException("IAP not available");
 
         public Action OnCheckIapAvailabilitySuccess { get; set; }
         public Action<HMSException> OnCheckIapAvailabilityFailure { get; set; }
@@ -66,7 +63,6 @@ namespace HmsPlugin
         // TODO Obtain non-consumables too!
         public void ObtainProductInfo(List<string> productIdConsumablesList, List<string> productIdNonConsumablesList, List<string> productIdSubscriptionList)
         {
-
             if (iapAvailable != true)
             {
                 OnObtainProductInfoFailure?.Invoke(IAP_NOT_AVAILABLE);
@@ -159,7 +155,6 @@ namespace HmsPlugin
 
         public void ConsumePurchaseWithToken(string token)
         {
-
             if (iapAvailable != true)
             {
                 OnObtainProductInfoFailure?.Invoke(IAP_NOT_AVAILABLE);
@@ -245,7 +240,6 @@ namespace HmsPlugin
 
         public void ObtainOwnedPurchases()
         {
-
             if (iapAvailable != true)
             {
                 OnObtainProductInfoFailure?.Invoke(IAP_NOT_AVAILABLE);
