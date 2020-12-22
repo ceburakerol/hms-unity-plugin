@@ -27,8 +27,8 @@ namespace HmsPlugin
         {
             Debug.Log("HMS GAMES: Game init");
             HuaweiMobileServicesUtil.SetApplication();
-            accountManager = AccountManager.GetInstance();
-            saveGameManager = SaveGameManager.GetInstance();
+            accountManager = GetComponent<AccountManager>();//AccountManager.GetInstance();
+            saveGameManager = GetComponent<SaveGameManager>();//SaveGameManager.GetInstance();
             Init();
         }
 

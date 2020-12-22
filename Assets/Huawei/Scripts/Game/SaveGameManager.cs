@@ -27,7 +27,7 @@ namespace HmsPlugin
         // Start is called before the first frame update
         void Start()
         {
-            accountManager = AccountManager.GetInstance();
+            accountManager = GetComponent<AccountManager>();//AccountManager.GetInstance();
         }
         public void SavedGameAuth()
         {

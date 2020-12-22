@@ -15,7 +15,7 @@ public class GameDemoManager : MonoBehaviour
 
     private bool achievements = true;
     private bool leaderboards = true;
-    private bool customUnit = false;
+    private bool customUnit = true;
     private const string MAX_FILE_SIZE = "Max File Size: {0}";
     private const string MAX_IMAGE_SIZE = "Max Image Size: {0}";
 
@@ -31,13 +31,13 @@ public class GameDemoManager : MonoBehaviour
     private InputField InputFieldDesc, InputFieldPlayedTime, InputFieldProgress;
     void Start()
     {
-        gameManager = GameManager.GetInstance();
+        gameManager = GetComponent<GameManager>();//GameManager.GetInstance();
 
-        saveGameManager = SaveGameManager.GetInstance();
+        saveGameManager = GetComponent<SaveGameManager>();//SaveGameManager.GetInstance();
 
-        leaderboardManager = LeaderboardManager.GetInstance();
+        leaderboardManager = GetComponent<LeaderboardManager>();//LeaderboardManager.GetInstance();
 
-        achievementsManager = AchievementsManager.GetInstance();
+        achievementsManager = GetComponent<AchievementsManager>();//AchievementsManager.GetInstance();
         achievementsManager.OnShowAchievementsSuccess = OnShowAchievementsSuccess;
         achievementsManager.OnShowAchievementsFailure = OnShowAchievementsFailure;
         achievementsManager.OnRevealAchievementSuccess = OnRevealAchievementSuccess;
@@ -247,17 +247,17 @@ public class GameDemoManager : MonoBehaviour
 
     // Submit Score
 
-    public void SubmitScore(string leaderboardId, long score, string scoreTips)
+    public void SubmitScore() //string leaderboardId, long score, string scoreTips
     {
         if (customUnit)
         {
-            leaderboardManager.SubmitScore(leaderboardId, score, scoreTips);
+            leaderboardManager.SubmitScore("19910B6BDF499E6E6E64247827946415C86202FC38A56B8FE03CA3BA09A0AA40", 123456, "ZUUKSTEST");
             leaderboardManager.OnSubmitScoreSuccess = OnSubmitScoreSuccess;
             leaderboardManager.OnSubmitScoreFailure = OnSubmitScoreFailure;
         }
         else
         {
-            leaderboardManager.SubmitScore(leaderboardId, score);
+            leaderboardManager.SubmitScore("19910B6BDF499E6E6E64247827946415C86202FC38A56B8FE03CA3BA09A0AA40", 123456);
         }
 
     }

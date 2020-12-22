@@ -36,11 +36,11 @@ namespace HmsPlugin
         public void Start()
         {
             Debug.Log("HMS GAMES: Achievements init");
-            accountManager = AccountManager.GetInstance();
+            accountManager = GetComponent<AccountManager>();//AccountManager.GetInstance();
             if (accountManager.HuaweiId != null)
             {
                 Debug.Log("HMS GAMES: Achievements init");
-                accountManager = AccountManager.GetInstance();
+                accountManager = GetComponent<AccountManager>();//AccountManager.GetInstance();
                 if (accountManager.HuaweiId != null)
                 {
                     achievementsClient = Games.GetAchievementsClient(accountManager.HuaweiId);
