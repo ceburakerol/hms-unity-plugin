@@ -38,8 +38,6 @@ namespace HmsPlugin
             }
         }
 
-        public IRankingsClient rankingsClient;
-
         private HuaweiIdAuthService authService;
 
         public AuthHuaweiId HuaweiId { get; set; }
@@ -50,7 +48,6 @@ namespace HmsPlugin
         public void OnSignInSuccess(AuthHuaweiId authHuaweiId)
         {
             Debug.Log("[HMS]: SIGN IN SUCCESS " + authHuaweiId.DisplayName);
-            rankingsClient = Games.GetRankingsClient(authHuaweiId);
         }
 
         public void OnSignInFailure(HMSException error)
@@ -68,7 +65,6 @@ namespace HmsPlugin
         {
             OnSignInSuccessAction = OnSignInSuccess;
             OnSignInFailedAction = OnSignInFailure;
-            HuaweiMobileServicesUtil.SetApplication();
         }
 
         public void SignIn()

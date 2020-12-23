@@ -1,6 +1,4 @@
-﻿
-
-using HuaweiMobileServices.Base;
+﻿using HuaweiMobileServices.Base;
 using HuaweiMobileServices.IAP;
 using HuaweiMobileServices.Utils;
 using System;

@@ -10,7 +10,13 @@ namespace HmsPlugin
 {
     public class LeaderboardManager : MonoBehaviour
     {
-        AccountManager accountManager;
+        #region Variables
+
+        public IRankingsClient rankingsClient;
+
+        #endregion
+
+        #region Actions
 
         public Action<int> OnIsUserScoreShownOnLeaderboardsSuccessAction { get; set; }
         public Action<HMSException> OnIsUserScoreShownOnLeaderboardsFailureAction { get; set; }
@@ -33,35 +39,9 @@ namespace HmsPlugin
         public Action<ScoreSubmissionInfo> OnSubmitScoreSuccessAction { get; set; }
         public Action<HMSException> OnSubmitScoreFailureAction { get; set; }
 
-        private void Awake()
-        {
-            accountManager = GetComponent<AccountManager>();
-        }
+        #endregion
 
-        public void Start()
-        {
-            OnIsUserScoreShownOnLeaderboardsSuccessAction = OnIsUserScoreShownOnLeaderboardsSuccess;
-            OnIsUserScoreShownOnLeaderboardsFailureAction = OnIsUserScoreShownOnLeaderboardsFailure;
-
-            OnSetUserScoreShownOnLeaderboardsSuccessAction = OnSetUserScoreShownOnLeaderboardsSuccess;
-            OnSetUserScoreShownOnLeaderboardsFailureAction = OnSetUserScoreShownOnLeaderboardsFailure;
-
-            OnShowLeaderboardsSuccessAction = OnShowLeaderboardsSuccess;
-            OnShowLeaderboardsFailureAction = OnShowLeaderboardsFailure;
-
-            OnSubmitScoreSuccessAction = OnSubmitScoreSuccess;
-            OnSubmitScoreFailureAction = OnSubmitScoreFailure;
-
-            OnGetLeaderboardsDataSuccessAction = OnGetLeaderboardsDataSuccess;
-            OnGetLeaderboardsDataFailureAction = OnGetLeaderboardsDataFailure;
-
-            OnGetLeaderboardDataSuccessAction = OnGetLeaderboardDataSuccess;
-            OnGetLeaderboardDataFailureAction = OnGetLeaderboardDataFailure;
-
-            OnGetScoresFromLeaderboardSuccessAction = OnGetScoresFromLeaderboardSuccess;
-            OnGetScoresFromLeaderboardFailureAction = OnGetScoresFromLeaderboardFailure;
-
-        }
+        #region Events
 
         private void OnIsUserScoreShownOnLeaderboardsSuccess(int id)
         {
@@ -133,10 +113,39 @@ namespace HmsPlugin
             Debug.Log("HMS Games: GetScoresFromLeaderboard ERROR " + exception.Message);
         }
 
+        #endregion
+
+        #region Unity Events
+
+        public void Start()
+        {
+            OnIsUserScoreShownOnLeaderboardsSuccessAction = OnIsUserScoreShownOnLeaderboardsSuccess;
+            OnIsUserScoreShownOnLeaderboardsFailureAction = OnIsUserScoreShownOnLeaderboardsFailure;
+
+            OnSetUserScoreShownOnLeaderboardsSuccessAction = OnSetUserScoreShownOnLeaderboardsSuccess;
+            OnSetUserScoreShownOnLeaderboardsFailureAction = OnSetUserScoreShownOnLeaderboardsFailure;
+
+            OnShowLeaderboardsSuccessAction = OnShowLeaderboardsSuccess;
+            OnShowLeaderboardsFailureAction = OnShowLeaderboardsFailure;
+
+            OnSubmitScoreSuccessAction = OnSubmitScoreSuccess;
+            OnSubmitScoreFailureAction = OnSubmitScoreFailure;
+
+            OnGetLeaderboardsDataSuccessAction = OnGetLeaderboardsDataSuccess;
+            OnGetLeaderboardsDataFailureAction = OnGetLeaderboardsDataFailure;
+
+            OnGetLeaderboardDataSuccessAction = OnGetLeaderboardDataSuccess;
+            OnGetLeaderboardDataFailureAction = OnGetLeaderboardDataFailure;
+
+            OnGetScoresFromLeaderboardSuccessAction = OnGetScoresFromLeaderboardSuccess;
+            OnGetScoresFromLeaderboardFailureAction = OnGetScoresFromLeaderboardFailure;
+        }
+
+        #endregion
 
         public void IsUserScoreShownOnLeaderboards()
         {
-            ITask<int> task = accountManager.rankingsClient.GetRankingSwitchStatus();
+            ITask<int> task = rankingsClient.GetRankingSwitchStatus();
             task.AddOnSuccessListener((result) =>
             {
                 Debug.Log("[HMS GAMES] isUserScoreShownOnLeaderboards SUCCESS" + result);
@@ -147,12 +156,11 @@ namespace HmsPlugin
                 Debug.Log("[HMS GAMES] isUserScoreShownOnLeaderboards ERROR");
                 OnIsUserScoreShownOnLeaderboardsFailureAction?.Invoke(exception);
             });
-
         }
 
         public void SetUserScoreShownOnLeaderboards(int active)
         {
-            ITask<int> task = accountManager.rankingsClient.SetRankingSwitchStatus(active);
+            ITask<int> task = rankingsClient.SetRankingSwitchStatus(active);
             task.AddOnSuccessListener((result) =>
             {
                 Debug.Log("[HMS GAMES] SetUserScoreShownOnLeaderboards SUCCESS" + result);
@@ -167,13 +175,12 @@ namespace HmsPlugin
 
         public void SubmitScore_Click()
         {
-            SubmitScore("19910B6BDF499E6E6E64247827946415C86202FC38A56B8FE03CA3BA09A0AA40", 9999, "TESTTIPS");
+            SubmitScore("19910B6BDF499E6E6E64247827946415C86202FC38A56B8FE03CA3BA09A0AA40", 9999);
         }
 
         public void SubmitScore(string leaderboardId, long score)
         {
-            Debug.Log("RANKINGS CLIENT : " + accountManager.rankingsClient.ToString());
-            ITask<ScoreSubmissionInfo> task = accountManager.rankingsClient.SubmitScoreWithResult(leaderboardId, score);
+            ITask<ScoreSubmissionInfo> task = rankingsClient.SubmitScoreWithResult(leaderboardId, score);
             task.AddOnSuccessListener((scoreInfo) =>
             {
                 OnSubmitScoreSuccessAction?.Invoke(scoreInfo);
@@ -185,8 +192,7 @@ namespace HmsPlugin
 
         public void SubmitScore(string leaderboardId, long score, string scoreTips)
         {
-            Debug.Log("RANKINGS CLIENT : " + accountManager.rankingsClient.ToString());
-            ITask<ScoreSubmissionInfo> task = accountManager.rankingsClient.SubmitScoreWithResult(leaderboardId, score, scoreTips);
+            ITask<ScoreSubmissionInfo> task = rankingsClient.SubmitScoreWithResult(leaderboardId, score, scoreTips);
             task.AddOnSuccessListener((scoreInfo) =>
             {
                 OnSubmitScoreSuccessAction?.Invoke(scoreInfo);
@@ -198,7 +204,7 @@ namespace HmsPlugin
 
         public void ShowLeaderboards()
         {
-            accountManager.rankingsClient.ShowTotalRankings(() =>
+            rankingsClient.ShowTotalRankings(() =>
             {
                 Debug.Log("[HMS GAMES] ShowLeaderboards SUCCESS");
                 OnShowLeaderboardsSuccessAction?.Invoke();
@@ -212,7 +218,7 @@ namespace HmsPlugin
 
         public void GetLeaderboardsData()
         {
-            ITask<IList<Ranking>> task = accountManager.rankingsClient.GetRankingSummary(true);
+            ITask<IList<Ranking>> task = rankingsClient.GetRankingSummary(true);
             task.AddOnSuccessListener((result) =>
             {
                 Debug.Log("[HMS GAMES] GetLeaderboardsData SUCCESS");
@@ -226,7 +232,7 @@ namespace HmsPlugin
 
         public void GetLeaderboardData(string leaderboardId)
         {
-            ITask<Ranking> task = accountManager.rankingsClient.GetRankingSummary(leaderboardId, true);
+            ITask<Ranking> task = rankingsClient.GetRankingSummary(leaderboardId, true);
             task.AddOnSuccessListener((result) =>
             {
                 Debug.Log("[HMS GAMES] GetLeaderboardsData SUCCESS");
@@ -242,9 +248,7 @@ namespace HmsPlugin
         public void GetScoresFromLeaderboard(string leaderboardId, int timeDimension, int maxResults, int offsetPlayerRank, int pageDirection)
         {
 
-            ITask<RankingScores> task =
-                accountManager.rankingsClient.GetRankingTopScores(leaderboardId, timeDimension, maxResults, offsetPlayerRank, pageDirection);
-
+            ITask<RankingScores> task = rankingsClient.GetRankingTopScores(leaderboardId, timeDimension, maxResults, offsetPlayerRank, pageDirection);
             task.AddOnSuccessListener((result) =>
             {
                 Debug.Log("[HMS GAMES] GetScoresFromLeaderboard SUCCESS");
