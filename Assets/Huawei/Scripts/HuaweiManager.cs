@@ -91,7 +91,7 @@ namespace HmsPlugin
 
         public void PrepareSaveGameManager()
         {
-            //saveGameManager.playersClient = Games.GetArchiveClient(accountManager.HuaweiId);
+            saveGameManager.archiveClient = Games.GetArchiveClient(accountManager.HuaweiId);
         }
 
         public Action<Player> OnGetPlayerInfoSuccess { get; set; }
@@ -117,5 +117,4 @@ namespace HmsPlugin
             }
         }
     }
-
 }

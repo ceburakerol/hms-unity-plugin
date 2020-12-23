@@ -10,6 +10,8 @@ namespace HmsPlugin
 {
     public class SaveGameManager : MonoBehaviour
     {
+        public IArchivesClient archiveClient;
+
         public void CommitGame()
         {
             Commit("TestSaveGameJSON", 100, 100, Application.streamingAssetsPath, "png");
@@ -40,7 +42,7 @@ namespace HmsPlugin
 
         public void Commit(string description, long playedTime, long progress, string ImagePath, string imageType)
         {
-            var archiveClient = Games.GetArchiveClient(HuaweiManager.Instance.accountManager.HuaweiId);
+            if (archiveClient == null) archiveClient = Games.GetArchiveClient(HuaweiManager.Instance.accountManager.HuaweiId);
             AndroidBitmap testBitmap = new AndroidBitmap(AndroidBitmapFactory.DecodeFile(ImagePath));
             ArchiveSummaryUpdate archiveSummaryUpdate = new ArchiveSummaryUpdate.Builder().SetActiveTime(playedTime)
                 .SetCurrentProgress(progress)
@@ -71,27 +73,26 @@ namespace HmsPlugin
         public void ShowArchive()
         {
             bool param = true;
-            var archiveClient = Games.GetArchiveClient(HuaweiManager.Instance.accountManager.HuaweiId);
+            if(archiveClient == null) archiveClient = Games.GetArchiveClient(HuaweiManager.Instance.accountManager.HuaweiId);
             ITask<IList<ArchiveSummary>> taskDisplay = archiveClient.GetArchiveSummaryList(param);
             taskDisplay.AddOnSuccessListener((result) =>
             {
                 if (result != null)
                 {
                     Debug.Log("[HMS:]Archive Summary is null ");
-                    return;
                 }
                 if (result.Count > 0)
                     Debug.Log("[HMS:]Archive Summary List size " + result.Count);
-
-                string title = "";
-                bool allowAddBtn = true, allowDeleteBtn = true;
-                int maxArchive = 100;
-                archiveClient.ShowArchiveListIntent(title, allowAddBtn, allowDeleteBtn, maxArchive);
 
             }).AddOnFailureListener((exception) =>
             {
                 Debug.Log("[HMS:] ShowArchive ERROR " + exception.WrappedExceptionMessage);
             });
+
+            string title = "";
+            bool allowAddBtn = true, allowDeleteBtn = true;
+            int maxArchive = 100;
+            archiveClient.ShowArchiveListIntent(title, allowAddBtn, allowDeleteBtn, maxArchive);
         }
 
         private void HandleDifference(OperationResult operationResult)

@@ -12,11 +12,8 @@
     <meta-data android:name="com.huawei.hms.client.appid" android:value="appid=101202103" />
     <meta-data android:name="com.huawei.hms.client.cpid" android:value="cpid=890090000003105563" />
     <meta-data android:name="com.huawei.hms.version" android:value="2.6.1" />
-<!--    <provider android:name="org.m0skit0.android.hms.unity.provider.AnalyticsContentProvider" android:authorities="com.evilmind.huawei" android:exported="false" android:grantUriPermissions="true" />-->
-<!--    <provider android:name="com.huawei.updatesdk.fileprovider.UpdateSdkFileProvider" android:authorities="com.evilmind.huawei.updateSdk.fileProvider" android:exported="false" android:grantUriPermissions="true" />-->
     <provider android:name="com.huawei.hms.update.provider.UpdateProvider" android:authorities="com.zuuks.bus.simulator.ultimate.hms.update.provider" android:exported="false" android:grantUriPermissions="true" />
     <provider android:name="com.huawei.updatesdk.fileprovider.UpdateSdkFileProvider" android:authorities="com.zuuks.bus.simulator.ultimate.updateSdk.fileProvider" android:exported="false" android:grantUriPermissions="true" />
-<!--    <provider android:name="com.huawei.updatesdk.fileprovider.UpdateSdkFileProvider" android:authorities="com.zuuks.bus.simulator.ultimate.updateSdk.fileProvider" android:exported="false" android:grantUriPermissions="true" />-->
   </application>
   <uses-permission android:name="com.huawei.appmarket.service.commondata.permission.GET_COMMON_DATA" />
   <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />

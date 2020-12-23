@@ -1,4 +1,8 @@
 {
+	"agcgw":{
+		"backurl":"connect-dre.dbankcloud.cn",
+		"url":"connect-dre.hispace.hicloud.com"
+	},
 	"client":{
 		"appType":"1",
 		"cp_id":"890090000003105563",
@@ -10,5 +14,22 @@
 		"api_key":"CV7NLPpo8F8qDLO9CUmcNvMCK9cZPgQM9FxsEitmVRrYWIflWUR0zsaNtyAy7UtA2gFWCaHRfM2S9gc3lOYEZwWvJkl6",
 		"package_name":"com.zuuks.bus.simulator.ultimate"
 	},
+	"service":{
+		"analytics":{
+			"collector_url":"datacollector-dre.dt.hicloud.com,datacollector-dre.dt.dbankcloud.cn",
+			"resource_id":"p1",
+			"channel_id":""
+		},
+		"search":{
+			"url":"https://search-dre.cloud.huawei.com"
+		},
+		"cloudstorage":{
+			"storage_url":"https://ops-dre.agcstorage.link"
+		},
+		"ml":{
+			"mlservice_url":"ml-api-dre.ai.dbankcloud.com,ml-api-dre.ai.dbankcloud.cn"
+		}
+	},
+	"region":"DE",
 	"configuration_version":"1.0"
 }
