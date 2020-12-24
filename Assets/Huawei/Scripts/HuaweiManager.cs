@@ -1,6 +1,7 @@
 ﻿using System;
 using HuaweiMobileServices.Base;
 using HuaweiMobileServices.Game;
+using HuaweiMobileServices.IAP;
 using HuaweiMobileServices.Id;
 using HuaweiMobileServices.Utils;
 using UnityEngine;
@@ -75,12 +76,14 @@ namespace HmsPlugin
                 josAppsClient.Init();
                 PrepareLeaderboardManager();
                 PrepareSaveGameManager();
+                PrepareIAPManager();
 
             }).AddOnFailureListener((exception) =>
             {
                 authService.StartSignIn(SignInSuccess, SignInFailure);
                 PrepareLeaderboardManager();
                 PrepareSaveGameManager();
+                PrepareIAPManager();
             });
         }
 
@@ -92,6 +95,17 @@ namespace HmsPlugin
         public void PrepareSaveGameManager()
         {
             saveGameManager.archiveClient = Games.GetArchiveClient(accountManager.HuaweiId);
+        }
+
+        public void PrepareIAPManager()
+        {
+            iapManager.iapClient = Iap.GetIapClient();
+            iapManager.OnCheckIapAvailabilitySuccess = iapManager.LoadStore;
+            iapManager.OnCheckIapAvailabilityFailure = (error) =>
+            {
+                Debug.Log($"[HMSPlugin]: IAP check failed. {error.Message}");
+            };
+            iapManager.CheckIapAvailability();
         }
 
         public Action<Player> OnGetPlayerInfoSuccess { get; set; }

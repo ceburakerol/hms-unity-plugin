@@ -4,12 +4,15 @@ using HuaweiMobileServices.Utils;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace HmsPlugin
 {
     public class IapManager : MonoBehaviour
     {
-        private static readonly HMSException IAP_NOT_AVAILABLE = new HMSException("IAP not available");
+        public IIapClient iapClient;
+
+        #region Actions
 
         public Action OnCheckIapAvailabilitySuccess { get; set; }
         public Action<HMSException> OnCheckIapAvailabilityFailure { get; set; }
@@ -29,18 +32,121 @@ namespace HmsPlugin
         public Action<OwnedPurchasesResult> OnObtainOwnedPurchasesSuccess { get; set; }
         public Action<HMSException> OnObtainOwnedPurchasesFailure { get; set; }
 
-        private IIapClient iapClient;
+        #endregion
+
+        #region Variables
+
         private bool? iapAvailable = null;
 
-        // Start is called before the first frame update
-        void Start()
-        {
+        public string[] ConsumableProducts;
+        public string[] NonConsumableProducts;
+        public string[] SubscriptionProducts;
 
+        [HideInInspector]
+        public int numberOfProductsRetrieved;
+
+        List<ProductInfo> productInfoList = new List<ProductInfo>();
+        List<string> productPurchasedList = new List<string>();
+
+        #endregion
+
+        #region Unity Events
+
+        UnityEvent loadedEvent;
+
+        private void Awake()
+        {
+            loadedEvent = new UnityEvent();
+        }
+
+        #endregion
+
+        public void BuyProduct(string productID)
+        {
+            OnBuyProductSuccess = (purchaseResultInfo) =>
+            {
+                ConsumePurchase(purchaseResultInfo);
+
+            };
+
+            OnBuyProductFailure = (errorCode) =>
+            {
+                switch (errorCode)
+                {
+                    case OrderStatusCode.ORDER_STATE_CANCEL:
+                        Debug.Log("[HMS]: User cancel payment");
+                        break;
+
+                    case OrderStatusCode.ORDER_STATE_FAILED:
+                        Debug.Log("[HMS]: order payment failed");
+                        break;
+
+                    case OrderStatusCode.ORDER_PRODUCT_OWNED:
+                        Debug.Log("[HMS]: Product owned");
+                        break;
+
+                    default:
+                        Debug.Log("[HMS:] BuyProduct ERROR" + errorCode);
+                        break;
+                }
+            };
+
+            var productInfo = productInfoList.Find(info => info.ProductId == productID);
+            var payload = "test";
+
+            BuyProduct(productInfo, payload);
+        }
+
+        public ProductInfo GetProductInfo(string productID)
+        {
+            return productInfoList.Find(productInfo => productInfo.ProductId == productID);
+        }
+
+        private void RestorePurchases()
+        {
+            OnObtainOwnedPurchasesSuccess = (ownedPurchaseResult) =>
+            {
+                productPurchasedList = (List<string>)ownedPurchaseResult.InAppPurchaseDataList;
+            };
+
+            OnObtainOwnedPurchasesFailure = (error) =>
+            {
+                Debug.Log("[HMS:] RestorePurchasesError" + error.Message);
+            };
+
+            ObtainOwnedPurchases();
+        }
+
+        public void LoadStore()
+        {
+            Debug.Log("[HMS]: LoadStore");
+
+            OnObtainProductInfoSuccess = (productInfoResultList) =>
+            {
+                if (productInfoResultList != null)
+                {
+                    foreach (ProductInfoResult productInfoResult in productInfoResultList)
+                    {
+                        foreach (ProductInfo productInfo in productInfoResult.ProductInfoList)
+                        {
+                            productInfoList.Add(productInfo);
+                        }
+
+                    }
+                }
+                loadedEvent.Invoke();
+            };
+
+            OnObtainProductInfoFailure = (error) =>
+            {
+                Debug.Log($"[HMSPlugin]: IAP ObtainProductInfo failed. {error.Message}");
+            };
+
+            ObtainProductInfo(new List<string>(ConsumableProducts), new List<string>(NonConsumableProducts), new List<string>(SubscriptionProducts));
         }
 
         public void CheckIapAvailability()
         {
-            iapClient = Iap.GetIapClient();
             ITask<EnvReadyResult> task = iapClient.EnvReady;
             task.AddOnSuccessListener((result) =>
             {
@@ -54,16 +160,14 @@ namespace HmsPlugin
                 iapClient = null;
                 iapAvailable = false;
                 OnCheckIapAvailabilityFailure?.Invoke(exception);
-
             });
         }
 
-        // TODO Obtain non-consumables too!
         public void ObtainProductInfo(List<string> productIdConsumablesList, List<string> productIdNonConsumablesList, List<string> productIdSubscriptionList)
         {
             if (iapAvailable != true)
             {
-                OnObtainProductInfoFailure?.Invoke(IAP_NOT_AVAILABLE);
+                OnObtainProductInfoFailure?.Invoke(new HMSException("IAP not available"));
                 return;
             }
 
@@ -85,7 +189,7 @@ namespace HmsPlugin
 
             if (iapAvailable != true)
             {
-                OnObtainProductInfoFailure?.Invoke(IAP_NOT_AVAILABLE);
+                OnObtainProductInfoFailure?.Invoke(new HMSException("IAP not available"));
                 return;
             }
 
@@ -105,7 +209,6 @@ namespace HmsPlugin
             {
                 Debug.Log("[HMSPlugin]: ERROR non  Consumable ObtainInfo" + exception.Message);
                 OnObtainProductInfoFailure?.Invoke(exception);
-
             });
         }
         public void ConsumeOwnedPurchases()
@@ -113,7 +216,7 @@ namespace HmsPlugin
 
             if (iapAvailable != true)
             {
-                OnObtainProductInfoFailure?.Invoke(IAP_NOT_AVAILABLE);
+                OnObtainProductInfoFailure?.Invoke(new HMSException("IAP not available"));
                 return;
             }
 
@@ -155,7 +258,7 @@ namespace HmsPlugin
         {
             if (iapAvailable != true)
             {
-                OnObtainProductInfoFailure?.Invoke(IAP_NOT_AVAILABLE);
+                OnObtainProductInfoFailure?.Invoke(new HMSException("IAP not available"));
                 return;
             }
 
@@ -184,7 +287,7 @@ namespace HmsPlugin
 
             if (iapAvailable != true)
             {
-                OnObtainProductInfoFailure?.Invoke(IAP_NOT_AVAILABLE);
+                OnObtainProductInfoFailure?.Invoke(new HMSException("IAP not available"));
                 return;
             }
 
@@ -240,7 +343,7 @@ namespace HmsPlugin
         {
             if (iapAvailable != true)
             {
-                OnObtainProductInfoFailure?.Invoke(IAP_NOT_AVAILABLE);
+                OnObtainProductInfoFailure?.Invoke(new HMSException("IAP not available"));
                 return;
             }
 
@@ -262,9 +365,22 @@ namespace HmsPlugin
                 OnObtainProductInfoFailure?.Invoke(exception);
             });
         }
+
+        #region Helper Functions
+
+        public void addListener(UnityAction action)
+        {
+            if (loadedEvent != null)
+            {
+                loadedEvent.AddListener(action);
+            }
+        }
+
         public bool IsNullOrEmpty(List<string> array)
         {
             return (array == null || array.Count == 0);
         }
+
+        #endregion
     }
 }
