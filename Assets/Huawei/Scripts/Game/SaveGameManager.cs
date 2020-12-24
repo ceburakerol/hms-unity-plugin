@@ -17,32 +17,10 @@ namespace HmsPlugin
             Commit("TestSaveGameJSON", 100, 100, Application.streamingAssetsPath, "png", "{\"ID\":1,\"Name\":\"Burak\",\"Address\":\"Turkey\"}");
         }
 
-        public void GetMaxImageSize()
-        {
-            ITask<int> detailSizeTask = Games.GetArchiveClient(HuaweiManager.Instance.accountManager.HuaweiId).LimitThumbnailSize;
-            detailSizeTask.AddOnSuccessListener((result) =>
-            {
-                Debug.Log("[HMSP:] GetMaxImageSize Success " + result);
-            }).AddOnFailureListener((exception) =>
-            {
-                Debug.Log("[HMSP:] GetMaxImageSize Failed");
-            });
-        }
-        public void GetMaxFileSize()
-        {
-            ITask<int> detailSizeTask = Games.GetArchiveClient(HuaweiManager.Instance.accountManager.HuaweiId).LimitDetailsSize;
-            detailSizeTask.AddOnSuccessListener((result) =>
-            {
-                Debug.Log("[HMSP:] GetMaxFileSize Success " + result);
-            }).AddOnFailureListener((exception) =>
-            {
-                Debug.Log("[HMSP:] GetMaxFileSize Failed");
-            });
-        }
-
         public void Commit(string description, long playedTime, long progress, string ImagePath, string imageType, string Json)
         {
             if (archiveClient == null) archiveClient = Games.GetArchiveClient(HuaweiManager.Instance.accountManager.HuaweiId);
+
             AndroidBitmap testBitmap = new AndroidBitmap(AndroidBitmapFactory.DecodeFile(ImagePath));
             ArchiveSummaryUpdate archiveSummaryUpdate = new ArchiveSummaryUpdate.Builder().SetActiveTime(playedTime)
                 .SetCurrentProgress(progress)
@@ -71,32 +49,32 @@ namespace HmsPlugin
 
         public void ShowArchive()
         {
+            if (archiveClient == null) archiveClient = Games.GetArchiveClient(HuaweiManager.Instance.accountManager.HuaweiId);
+
             bool param = true;
-            if(archiveClient == null) archiveClient = Games.GetArchiveClient(HuaweiManager.Instance.accountManager.HuaweiId);
             ITask<IList<ArchiveSummary>> taskDisplay = archiveClient.GetArchiveSummaryList(param);
             taskDisplay.AddOnSuccessListener((result) =>
             {
-                if (result != null)
-                {
+                if (result == null)
                     Debug.Log("[HMS:]Archive Summary is null ");
-                }
                 if (result.Count > 0)
                     Debug.Log("[HMS:]Archive Summary List size " + result.Count);
 
+                string title = "";
+                bool allowAddBtn = true, allowDeleteBtn = true;
+                int maxArchive = 100;
+                archiveClient.ShowArchiveListIntent(title, allowAddBtn, allowDeleteBtn, maxArchive);
 
             }).AddOnFailureListener((exception) =>
             {
                 Debug.Log("[HMS:] ShowArchive ERROR " + exception.WrappedExceptionMessage);
             });
-
-            string title = "";
-            bool allowAddBtn = true, allowDeleteBtn = true;
-            int maxArchive = 100;
-            archiveClient.ShowArchiveListIntent(title, allowAddBtn, allowDeleteBtn, maxArchive);
         }
 
         private void HandleDifference(OperationResult operationResult)
         {
+            if (archiveClient == null) archiveClient = Games.GetArchiveClient(HuaweiManager.Instance.accountManager.HuaweiId);
+
             if (operationResult != null)
             {
                 Difference archiveDifference = operationResult.Difference;
@@ -106,7 +84,7 @@ namespace HmsPlugin
                 {
                     return;
                 }
-                ITask<OperationResult> task = Games.GetArchiveClient(HuaweiManager.Instance.accountManager.HuaweiId).UpdateArchive(serverArchive);
+                ITask<OperationResult> task = archiveClient.UpdateArchive(serverArchive);
                 task.AddOnSuccessListener((result) =>
                 {
                     Debug.Log("OperationResult:" + ((operationResult == null) ? "" : operationResult.Different.ToString()));
@@ -127,8 +105,10 @@ namespace HmsPlugin
 
         public void UpdateSavedGame(String archiveID,ArchiveSummaryUpdate archiveSummaryUpdate, ArchiveDetails archiveContents)
         {
+            if (archiveClient == null) archiveClient = Games.GetArchiveClient(HuaweiManager.Instance.accountManager.HuaweiId);
+
             String archiveId = archiveID;
-            ITask<OperationResult> taskUpdateArchive = Games.GetArchiveClient(HuaweiManager.Instance.accountManager.HuaweiId).UpdateArchive(archiveId, archiveSummaryUpdate, archiveContents);
+            ITask<OperationResult> taskUpdateArchive = archiveClient.UpdateArchive(archiveId, archiveSummaryUpdate, archiveContents);
             taskUpdateArchive.AddOnSuccessListener((archiveDataOrConflict) =>
             {
                 Debug.Log("[HMS:] taskUpdateArchive" + archiveDataOrConflict.Difference);
@@ -141,15 +121,17 @@ namespace HmsPlugin
 
         public void LoadingSavedGame(String archiveId)
         {
+            if (archiveClient == null) archiveClient = Games.GetArchiveClient(HuaweiManager.Instance.accountManager.HuaweiId);
+
             int conflictPolicy = getConflictPolicy();
             ITask<OperationResult> taskLoadSavedGame;
             if (conflictPolicy == -1)
             {
-                taskLoadSavedGame = Games.GetArchiveClient(HuaweiManager.Instance.accountManager.HuaweiId).LoadArchiveDetails(archiveId);
+                taskLoadSavedGame = archiveClient.LoadArchiveDetails(archiveId);
             }
             else
             {
-                taskLoadSavedGame = Games.GetArchiveClient(HuaweiManager.Instance.accountManager.HuaweiId).LoadArchiveDetails(archiveId, conflictPolicy);
+                taskLoadSavedGame = archiveClient.LoadArchiveDetails(archiveId, conflictPolicy);
             }
             taskLoadSavedGame.AddOnSuccessListener((archiveDataOrConflict) =>
             {
@@ -164,7 +146,9 @@ namespace HmsPlugin
 
         public void DeleteSavedGames(ArchiveSummary archiveSummary)
         {
-            ITask<String> removeArchiveTask = Games.GetArchiveClient(HuaweiManager.Instance.accountManager.HuaweiId).RemoveArchive(archiveSummary);
+            if (archiveClient == null) archiveClient = Games.GetArchiveClient(HuaweiManager.Instance.accountManager.HuaweiId);
+
+            ITask<String> removeArchiveTask = archiveClient.RemoveArchive(archiveSummary);
             removeArchiveTask.AddOnSuccessListener((result) =>
             {
                 String deletedArchiveId = result;
@@ -176,16 +160,13 @@ namespace HmsPlugin
             });
         }
 
-        private int getConflictPolicy()
-        {
-            return 0 ;
-        }
-
         public void LoadThumbnail(Archive archive)
         {
+            if (archiveClient == null) archiveClient = Games.GetArchiveClient(HuaweiManager.Instance.accountManager.HuaweiId);
+
             if (archive.Summary.HasThumbnail())
             {
-                ITask<AndroidBitmap> coverImageTask = Games.GetArchiveClient(HuaweiManager.Instance.accountManager.HuaweiId).GetThumbnail(archive.Summary.Id);
+                ITask<AndroidBitmap> coverImageTask = archiveClient.GetThumbnail(archive.Summary.Id);
                 coverImageTask.AddOnSuccessListener((result) =>
                 {
                     Debug.Log("[HMS:] AndroidBitmap put it UI");
@@ -196,6 +177,38 @@ namespace HmsPlugin
                     Debug.Log("[HMS:] LoadThumbnail ERROR " + exception.ErrorCode);
                 });
             }
+        }
+
+        public void GetMaxImageSize()
+        {
+            if (archiveClient == null) archiveClient = Games.GetArchiveClient(HuaweiManager.Instance.accountManager.HuaweiId);
+
+            ITask<int> detailSizeTask = archiveClient.LimitThumbnailSize;
+            detailSizeTask.AddOnSuccessListener((result) =>
+            {
+                Debug.Log("[HMSP:] GetMaxImageSize Success " + result);
+            }).AddOnFailureListener((exception) =>
+            {
+                Debug.Log("[HMSP:] GetMaxImageSize Failed");
+            });
+        }
+        public void GetMaxFileSize()
+        {
+            if (archiveClient == null) archiveClient = Games.GetArchiveClient(HuaweiManager.Instance.accountManager.HuaweiId);
+
+            ITask<int> detailSizeTask = archiveClient.LimitDetailsSize;
+            detailSizeTask.AddOnSuccessListener((result) =>
+            {
+                Debug.Log("[HMSP:] GetMaxFileSize Success " + result);
+            }).AddOnFailureListener((exception) =>
+            {
+                Debug.Log("[HMSP:] GetMaxFileSize Failed");
+            });
+        }
+
+        private int getConflictPolicy()
+        {
+            return 0;
         }
     }
 }
