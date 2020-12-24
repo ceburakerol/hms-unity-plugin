@@ -14,7 +14,7 @@ namespace HmsPlugin
 
         public void CommitGame()
         {
-            Commit("TestSaveGameJSON", 100, 100, Application.streamingAssetsPath, "png");
+            Commit("TestSaveGameJSON", 100, 100, Application.streamingAssetsPath, "png", "{\"ID\":1,\"Name\":\"Burak\",\"Address\":\"Turkey\"}");
         }
 
         public void GetMaxImageSize()
@@ -40,7 +40,7 @@ namespace HmsPlugin
             });
         }
 
-        public void Commit(string description, long playedTime, long progress, string ImagePath, string imageType)
+        public void Commit(string description, long playedTime, long progress, string ImagePath, string imageType, string Json)
         {
             if (archiveClient == null) archiveClient = Games.GetArchiveClient(HuaweiManager.Instance.accountManager.HuaweiId);
             AndroidBitmap testBitmap = new AndroidBitmap(AndroidBitmapFactory.DecodeFile(ImagePath));
@@ -51,7 +51,7 @@ namespace HmsPlugin
                 .SetThumbnailMimeType(imageType)
                 .Build();
             ArchiveDetails archiveContents = new ArchiveDetails.Builder().Build();
-            byte[] byteArray = Encoding.UTF8.GetBytes(description);
+            byte[] byteArray = Encoding.UTF8.GetBytes(Json); //TODO : Serialize Save JSON
             archiveContents.Set(byteArray);
             bool isSupportCache = true;
             ITask<ArchiveSummary> addArchiveTask = archiveClient.AddArchive(archiveContents, archiveSummaryUpdate, isSupportCache);
@@ -67,7 +67,6 @@ namespace HmsPlugin
             {
                 Debug.Log("[HMS:] AddArchive fail: " + exception.ErrorCode + " :: " + exception.WrappedExceptionMessage + " ::  " + exception.WrappedCauseMessage);
             });
-            return;
         }
 
         public void ShowArchive()
@@ -83,6 +82,7 @@ namespace HmsPlugin
                 }
                 if (result.Count > 0)
                     Debug.Log("[HMS:]Archive Summary List size " + result.Count);
+
 
             }).AddOnFailureListener((exception) =>
             {
@@ -155,6 +155,7 @@ namespace HmsPlugin
             {
                 Debug.Log("[HMS:] taskUpdateArchive" + archiveDataOrConflict.Difference);
                 Debug.Log("isDifference:" + ((archiveDataOrConflict == null) ? "" : archiveDataOrConflict.Difference.ToString()));
+                Debug.Log("Archive Content : " + archiveDataOrConflict.Archive.Details.ToString()); //TODO : Deserialize Save JSON
             }).AddOnFailureListener((exception) =>
             {
                 Debug.Log("[HMS:] LoadingSavedGame ERROR " + exception.ErrorCode);
